@@ -1,14 +1,18 @@
 package System::NG;
 require v5.10;
 use feature qw(switch);
+use Exporter;
 
-@EXPORT = qw(system_ng);
+our $VERSION = "0.01";
+our @ISA       = qw(Exporter);
+our @EXPORT    = qw(system_ng);
+our @EXPORT_OK = qw(system_ng);
 
 # usage: 
 #   system_ng("ls -l");
 #   system_ng([">/dev/null", "2>/dev/null"], "ls -l");
 sub system_ng {
-	my $bg, $in, $out, $err;
+	my ($bg, $in, $out, $err);
 	my $process = sub {
 		my $arg = shift();
 		given ($arg) {
@@ -20,10 +24,10 @@ sub system_ng {
 	};
 	while (scalar(@_) && ref($_[0])) {
 		my $ref = shift();
-		if ($ref eq "SCALAR") {
+		if (ref($ref) eq "SCALAR") {
 			&$process($$ref);
 		}
-		elsif ($ref eq "ARRAY") {
+		elsif (ref($ref) eq "ARRAY") {
 			foreach my $arg (@$ref) {
 				&$process($arg);
 			}
@@ -32,10 +36,14 @@ sub system_ng {
 	my $pid = fork();
 	if ($pid) {
 		if (!$bg) {
-			if (waitpid($pid) == -1) {
-				warn("no such child process\n");
+			my $wait = waitpid($pid, 0);
+			given ($wait) {
+				when (-1)   { warn("no such child process\n"); }
+				when (0)    { warn("some processes are still running\n"); }
+				when ($pid) { return $?; }
 			}
-			return $?;
+		} else {
+			return 0;
 		}
 	}
 	elsif (defined $pid) {
@@ -51,10 +59,10 @@ sub system_ng {
 			when ("/dev/null") { close(STDERR); }
 			when (defined) { open(STDERR, ">", $err) or die $!; }
 		}
-		exec(@args);
+		exec(@_) or die("cannot exec @_\n");
 	}
 	else {
-		warn("fork unsuccessful\n");
+		die("cannot fork\n");
 	}
 }
 
