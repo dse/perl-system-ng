@@ -50,17 +50,39 @@ affects the execution of the program as follows:
 
 =item "&"
 
+The program is executed in the background, exactly as if you were
+running:
+
+    system("xterm &");
+
 =item "<anything"
 
-STDIN is redirected to the specified file or whatever else.
+STDIN is redirected from the specified file or whatever else, exactly
+as if you were running:
+
+    system("prog --foo '$file' <prog.in");
+
+but you can do this:
+
+    system(["<prog.in"], "prog --foo '$file'");
+
+or this:
+
+    system(["<prog.in"], "prog", "--foo", $file);
+
+which won't fail if there's an apostrophe ("'") in your $file name.
 
 =item ">anything"
 
-STDOUT is redirected to the specified file or whatever else.
+STDOUT is redirected to the specified file or whatever else.  Like:
+
+    system("prog --foo bar >prog.out");
 
 =item "2>anything"
 
-STDERR is redirected to the specified file or whatever else.
+STDERR is redirected to the specified file or whatever else.  Like:
+
+    system("prog --foo bar 2>prog.err");
 
 =back
 
