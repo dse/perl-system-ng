@@ -1,5 +1,7 @@
 package System::NG;
 require v5.10;
+use warnings;
+use strict;
 use feature qw(switch);
 
 our $VERSION   = "0.01";
