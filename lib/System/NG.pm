@@ -1,12 +1,74 @@
 package System::NG;
 require v5.10;
 use feature qw(switch);
-use Exporter;
 
-our $VERSION = "0.01";
+our $VERSION   = "0.01";
+
+use Exporter;
 our @ISA       = qw(Exporter);
 our @EXPORT    = qw(system_ng);
 our @EXPORT_OK = qw(system_ng);
+
+=head1 NAME
+
+System::NG - enhanced system() call
+
+=head1 SYNOPSIS
+
+    use System::NG;
+
+    system_ng("ls -l");
+    system_ng("ls", "-l");
+
+    system_ng(["&"], "xterm");
+
+    system_ng(["<prog.in", ">prog.out", "2>prog.err"], "prog");
+
+=head1 DESCRIPTION
+
+System::NG provides an enhanced system_ng() call that can be used as a
+drop-in replacement of Perl's built-in system() call.  system_ng()
+provides the ability to run a process in the background as well as
+redirect STDIN, STDOUT, and/or STDERR without using the less secure
+single-argument form of the system() call.
+
+=head1 EXPORTED FUNCTIONS
+
+=over 4
+
+=item system_ng(LIST);
+
+=item system_ng(ARRAYREF, LIST);
+
+Does exactly the same thing as system(LIST), returns the same value,
+and also returns the status in $? like the system call does.
+
+If the first argument is an ARRAYREF, each member of the ARRAYREF
+affects the execution of the program as follows:
+
+=over 4
+
+=item "&"
+
+=item "<anything"
+
+STDIN is redirected to the specified file or whatever else.
+
+=item ">anything"
+
+STDOUT is redirected to the specified file or whatever else.
+
+=item "2>anything"
+
+STDERR is redirected to the specified file or whatever else.
+
+=back
+
+Other arguments are ignored.
+
+=back
+
+=cut
 
 # usage: 
 #   system_ng("ls -l");
@@ -65,5 +127,22 @@ sub system_ng {
 		die("cannot fork\n");
 	}
 }
+
+=head1 BUGS
+
+eh?
+
+=head1 AUTHOR
+
+Darren Embry, C<dse at webonastick.com>.
+
+=head1 COPYRIGHT & LICENSE
+
+Copyright 2012 Darren Embry, all rights reserved.
+
+This program is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
+
+=cut
 
 1;
